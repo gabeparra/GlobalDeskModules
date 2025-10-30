@@ -390,6 +390,13 @@ const article = await client.getArticle(5);</code></pre>
     <script src="knowledge-base-client.js"></script>
 
     <script>
+        // Helper function to escape HTML and prevent XSS (also defined in knowledge-base-client.js)
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
         let kbWidget;
         let kbClient;
         let config = {
@@ -492,7 +499,7 @@ const article = await client.getArticle(5);</code></pre>
                 const results = await kbClient.search(query);
                 resultDiv.innerHTML = '<pre>' + JSON.stringify(results, null, 2) + '</pre>';
             } catch (error) {
-                resultDiv.innerHTML = '<p class="error">Error: ' + error.message + '</p>';
+                resultDiv.innerHTML = '<p class="error">Error: ' + escapeHtml(error.message) + '</p>';
             }
         }
     </script>

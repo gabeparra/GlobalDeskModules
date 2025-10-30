@@ -5,6 +5,13 @@
  * from JavaScript/frontend applications.
  */
 
+// Helper function to escape HTML and prevent XSS
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
 class FreeScoutKBClient {
     /**
      * Initialize the Knowledge Base API client
@@ -377,7 +384,7 @@ class KnowledgeBaseWidget {
             
             content.innerHTML = `
                 <button id="kb-back-btn">← Back to Categories</button>
-                <h3>Search Results for "${query}"</h3>
+                <h3>Search Results for "${escapeHtml(query)}"</h3>
             `;
 
             document.getElementById('kb-back-btn').addEventListener('click', () => {
