@@ -42,27 +42,57 @@ def main():
             print()
     
     print("\n" + "="*60)
-    print("FREESCOUT KNOWLEDGE BASE")
+    print("FREESCOUT KNOWLEDGE BASE API (New Module)")
     print("="*60 + "\n")
     
-    # Try to access knowledge base
-    print("Fetching knowledge base folders...")
-    folders = client.list_kb_folders()
-    if folders:
-        print(f"Found {len(folders)} knowledge base folders:")
-        for folder in folders:
-            print(f"  - {folder.get('name')} (ID: {folder.get('id')})")
+    # Try to access knowledge base using new API module
+    print("Fetching knowledge base categories (public API)...")
+    categories = client.list_kb_categories(public=True)
+    if categories:
+        print(f"Found {len(categories)} knowledge base categories:")
+        for category in categories[:5]:  # Show first 5
+            print(f"  - {category.get('name')} (ID: {category.get('id')})")
+            if category.get('children'):
+                for child in category.get('children', []):
+                    print(f"    └─ {child.get('name')} (ID: {child.get('id')})")
     else:
-        print("No folders found or knowledge base may require a module.")
+        print("No categories found. Make sure the KnowledgeBaseAPI module is installed and activated.")
     
-    print("\nFetching knowledge base articles...")
-    articles = client.list_kb_articles()
+    print("\nFetching knowledge base articles (public API)...")
+    articles_response = client.list_kb_articles(public=True, per_page=5)
+    articles = articles_response.get('data', [])
     if articles:
-        print(f"Found {len(articles)} articles:")
-        for article in articles[:5]:  # Show first 5
-            print(f"  - {article.get('title', 'Untitled')} (ID: {article.get('id')})")
+        print(f"Found articles (showing first 5):")
+        for article in articles:
+            print(f"  - {article.get('title', 'Untitled')} (ID: {article.get('id')}, Views: {article.get('views', 0)})")
+            if article.get('category'):
+                print(f"    Category: {article['category'].get('name')}")
     else:
-        print("No articles found. Knowledge base may require a specific module or different endpoints.")
+        print("No articles found. Make sure the KnowledgeBaseAPI module is installed.")
+    
+    # Test search
+    if articles:
+        print("\nTesting search functionality...")
+        search_results = client.search_kb_articles("help", public=True)
+        if search_results:
+            print(f"Found {len(search_results)} results for 'help':")
+            for result in search_results[:3]:  # Show first 3
+                print(f"  - {result.get('title')}")
+        else:
+            print("No search results found.")
+    
+    # Get detailed article if available
+    if articles and len(articles) > 0:
+        first_article_id = articles[0].get('id')
+        print(f"\nFetching full details for article ID {first_article_id}...")
+        article_data = client.get_kb_article(first_article_id, public=True)
+        if article_data and article_data.get('article'):
+            article = article_data['article']
+            print(f"Title: {article.get('title')}")
+            print(f"Excerpt: {article.get('excerpt', 'No excerpt')[:100]}...")
+            print(f"Views: {article.get('views', 0)}")
+            if article_data.get('category'):
+                print(f"Category: {article_data['category'].get('name')}")
 
 if __name__ == '__main__':
     main()
