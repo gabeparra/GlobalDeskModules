@@ -38,7 +38,7 @@ A complete Laravel/PHP module that integrates with FreeScout to expose the knowl
 **Key Components:**
 - Service providers for module registration
 - Route definitions for API endpoints
-- Full-featured controller with 12 endpoint methods
+- Full-featured controller with 11 endpoint methods (plus 1 helper method)
 - Configuration file for customization
 - JSON manifests for FreeScout integration
 
