@@ -1,0 +1,28 @@
+{
+    "name": "freescout/knowledgebaseapi",
+    "description": "Knowledge Base API Module for FreeScout",
+    "type": "freescout-module",
+    "keywords": ["freescout", "module", "knowledge base", "api"],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "FreeScout Community",
+            "email": "support@freescout.net"
+        }
+    ],
+    "require": {
+        "php": ">=7.4"
+    },
+    "autoload": {
+        "psr-4": {
+            "Modules\\KnowledgeBaseAPI\\": ""
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Modules\\KnowledgeBaseAPI\\Providers\\KnowledgeBaseAPIServiceProvider"
+            ]
+        }
+    }
+}

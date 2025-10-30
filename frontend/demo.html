@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FreeScout Knowledge Base API Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: #f5f5f5;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .config-section {
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 5px;
+            margin-bottom: 30px;
+            border-left: 4px solid #007bff;
+        }
+
+        .config-section h2 {
+            font-size: 18px;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #555;
+        }
+
+        input[type="text"],
+        input[type="url"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background: #0056b3;
+        }
+
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #eee;
+        }
+
+        .tab {
+            padding: 10px 20px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            color: #666;
+            border-bottom: 3px solid transparent;
+        }
+
+        .tab.active {
+            color: #007bff;
+            border-bottom-color: #007bff;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        #kb-widget {
+            margin-top: 20px;
+        }
+
+        .kb-widget {
+            background: white;
+        }
+
+        .kb-search {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .kb-search input {
+            flex: 1;
+        }
+
+        #kb-content {
+            min-height: 300px;
+        }
+
+        .kb-category-list,
+        .kb-article-list,
+        .kb-search-results {
+            list-style: none;
+            padding: 0;
+        }
+
+        .kb-category-list li,
+        .kb-article-list li,
+        .kb-search-results li {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            transition: background 0.2s;
+        }
+
+        .kb-category-list li:hover,
+        .kb-article-list li:hover,
+        .kb-search-results li:hover {
+            background: #f9f9f9;
+        }
+
+        .kb-category-list a,
+        .kb-article-list a,
+        .kb-search-results a {
+            color: #007bff;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .kb-category-list a:hover,
+        .kb-article-list a:hover,
+        .kb-search-results a:hover {
+            text-decoration: underline;
+        }
+
+        .kb-article {
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 5px;
+        }
+
+        .article-meta {
+            color: #666;
+            font-size: 14px;
+            margin: 10px 0 20px 0;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .article-meta span {
+            margin-right: 20px;
+        }
+
+        .article-content {
+            margin-top: 20px;
+            line-height: 1.8;
+        }
+
+        .breadcrumb {
+            color: #666;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+
+        .breadcrumb a {
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        .error {
+            color: #d9534f;
+            padding: 15px;
+            background: #f8d7da;
+            border-radius: 4px;
+            border: 1px solid #f5c6cb;
+        }
+
+        .success {
+            color: #155724;
+            padding: 15px;
+            background: #d4edda;
+            border-radius: 4px;
+            border: 1px solid #c3e6cb;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .demo-section {
+            margin-bottom: 30px;
+        }
+
+        .demo-section h3 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .result-box {
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 10px;
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+        }
+
+        pre {
+            background: #f4f4f4;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+            font-size: 12px;
+        }
+
+        code {
+            color: #e83e8c;
+        }
+
+        #kb-back-btn {
+            margin-bottom: 20px;
+            background: #6c757d;
+        }
+
+        #kb-back-btn:hover {
+            background: #5a6268;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>FreeScout Knowledge Base API Demo</h1>
+        <p class="subtitle">Interactive demonstration of the Knowledge Base API endpoints</p>
+
+        <!-- Configuration Section -->
+        <div class="config-section">
+            <h2>⚙️ Configuration</h2>
+            <div class="form-group">
+                <label for="freescout-url">FreeScout URL:</label>
+                <input type="url" id="freescout-url" placeholder="https://your-freescout.com" 
+                       value="https://your-freescout.com">
+            </div>
+            <div class="form-group">
+                <label for="api-key">API Key (optional, for authenticated endpoints):</label>
+                <input type="text" id="api-key" placeholder="Your API key">
+            </div>
+            <button onclick="saveConfig()">Save Configuration</button>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('widget')">Interactive Widget</button>
+            <button class="tab" onclick="switchTab('api-demo')">API Demo</button>
+            <button class="tab" onclick="switchTab('docs')">Documentation</button>
+        </div>
+
+        <!-- Widget Tab -->
+        <div id="widget-tab" class="tab-content active">
+            <h2>Knowledge Base Widget</h2>
+            <p>This widget provides a complete, interactive knowledge base interface.</p>
+            <div id="kb-widget"></div>
+        </div>
+
+        <!-- API Demo Tab -->
+        <div id="api-demo-tab" class="tab-content">
+            <h2>API Endpoint Testing</h2>
+
+            <div class="demo-section">
+                <h3>1. Health Check</h3>
+                <button onclick="testHealthCheck()">Test Health Endpoint</button>
+                <div id="health-result" class="result-box" style="display:none;"></div>
+            </div>
+
+            <div class="demo-section">
+                <h3>2. List Categories</h3>
+                <button onclick="testListCategories()">Get All Categories</button>
+                <div id="categories-result" class="result-box" style="display:none;"></div>
+            </div>
+
+            <div class="demo-section">
+                <h3>3. List Articles</h3>
+                <button onclick="testListArticles()">Get All Articles</button>
+                <div id="articles-result" class="result-box" style="display:none;"></div>
+            </div>
+
+            <div class="demo-section">
+                <h3>4. Search</h3>
+                <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                    <input type="text" id="search-query" placeholder="Enter search query" style="flex: 1;">
+                    <button onclick="testSearch()">Search</button>
+                </div>
+                <div id="search-result" class="result-box" style="display:none;"></div>
+            </div>
+        </div>
+
+        <!-- Documentation Tab -->
+        <div id="docs-tab" class="tab-content">
+            <h2>API Documentation</h2>
+            
+            <h3>Public Endpoints</h3>
+            <p>These endpoints don't require authentication:</p>
+            <pre><code>GET /api/kb/public/categories
+GET /api/kb/public/categories/{id}
+GET /api/kb/public/articles
+GET /api/kb/public/articles/{id}
+GET /api/kb/public/search?q={query}</code></pre>
+
+            <h3>Authenticated Endpoints</h3>
+            <p>These endpoints require an API key in the X-FreeScout-API-Key header:</p>
+            <pre><code>GET /api/kb/categories
+GET /api/kb/categories/{id}
+GET /api/kb/articles
+GET /api/kb/articles/{id}
+GET /api/kb/search?q={query}
+GET /api/kb/health</code></pre>
+
+            <h3>JavaScript Usage</h3>
+            <pre><code>// Initialize client
+const client = new FreeScoutKBClient('https://your-freescout.com');
+
+// Get categories
+const categories = await client.getCategories();
+
+// Get articles
+const articles = await client.getArticles({ categoryId: 1, page: 1 });
+
+// Search
+const results = await client.search('password reset');
+
+// Get specific article
+const article = await client.getArticle(5);</code></pre>
+
+            <h3>Response Format</h3>
+            <pre><code>{
+    "success": true,
+    "data": { /* response data */ }
+}</code></pre>
+        </div>
+    </div>
+
+    <!-- Include the Knowledge Base Client library -->
+    <script src="knowledge-base-client.js"></script>
+
+    <script>
+        let kbWidget;
+        let kbClient;
+        let config = {
+            url: 'https://your-freescout.com',
+            apiKey: ''
+        };
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeWidget();
+        });
+
+        function saveConfig() {
+            config.url = document.getElementById('freescout-url').value;
+            config.apiKey = document.getElementById('api-key').value;
+            
+            // Reinitialize widget with new config
+            initializeWidget();
+            
+            alert('Configuration saved! The widget has been reinitialized.');
+        }
+
+        function initializeWidget() {
+            try {
+                kbClient = new FreeScoutKBClient(config.url, config.apiKey);
+                kbWidget = new KnowledgeBaseWidget('kb-widget', config.url);
+            } catch (error) {
+                console.error('Error initializing widget:', error);
+                document.getElementById('kb-widget').innerHTML = 
+                    '<p class="error">Error initializing widget. Please check your configuration.</p>';
+            }
+        }
+
+        function switchTab(tabName) {
+            // Update tab buttons
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            // Update tab content
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.getElementById(tabName + '-tab').classList.add('active');
+        }
+
+        async function testHealthCheck() {
+            const resultDiv = document.getElementById('health-result');
+            resultDiv.style.display = 'block';
+            resultDiv.innerHTML = '<div class="loading">Loading...</div>';
+
+            try {
+                const result = await kbClient.healthCheck();
+                resultDiv.innerHTML = '<pre>' + JSON.stringify(result, null, 2) + '</pre>';
+            } catch (error) {
+                resultDiv.innerHTML = '<p class="error">Error: ' + error.message + '</p>';
+            }
+        }
+
+        async function testListCategories() {
+            const resultDiv = document.getElementById('categories-result');
+            resultDiv.style.display = 'block';
+            resultDiv.innerHTML = '<div class="loading">Loading...</div>';
+
+            try {
+                const categories = await kbClient.getCategories();
+                resultDiv.innerHTML = '<pre>' + JSON.stringify(categories, null, 2) + '</pre>';
+            } catch (error) {
+                resultDiv.innerHTML = '<p class="error">Error: ' + error.message + '</p>';
+            }
+        }
+
+        async function testListArticles() {
+            const resultDiv = document.getElementById('articles-result');
+            resultDiv.style.display = 'block';
+            resultDiv.innerHTML = '<div class="loading">Loading...</div>';
+
+            try {
+                const result = await kbClient.getArticles({ perPage: 10 });
+                resultDiv.innerHTML = '<pre>' + JSON.stringify(result, null, 2) + '</pre>';
+            } catch (error) {
+                resultDiv.innerHTML = '<p class="error">Error: ' + error.message + '</p>';
+            }
+        }
+
+        async function testSearch() {
+            const query = document.getElementById('search-query').value;
+            const resultDiv = document.getElementById('search-result');
+            
+            if (!query) {
+                alert('Please enter a search query');
+                return;
+            }
+
+            resultDiv.style.display = 'block';
+            resultDiv.innerHTML = '<div class="loading">Searching...</div>';
+
+            try {
+                const results = await kbClient.search(query);
+                resultDiv.innerHTML = '<pre>' + JSON.stringify(results, null, 2) + '</pre>';
+            } catch (error) {
+                resultDiv.innerHTML = '<p class="error">Error: ' + error.message + '</p>';
+            }
+        }
+    </script>
+</body>
+</html>

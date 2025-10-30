@@ -269,52 +269,125 @@ class FreeScoutClient:
         
         return self._make_request('POST', f'/conversations/{conversation_id}/threads', data)
     
-    # Knowledge Base operations
-    def list_kb_folders(self) -> List[Dict]:
-        """List all knowledge base folders/categories"""
+    # Knowledge Base operations (using KnowledgeBaseAPI module)
+    def list_kb_categories(self, public: bool = True) -> List[Dict]:
+        """
+        List all knowledge base categories
+        
+        Args:
+            public: Use public endpoint (no auth) if True, otherwise use authenticated endpoint
+        
+        Returns:
+            List of category dictionaries with hierarchical structure
+        """
         try:
-            response = self._make_request('GET', '/folders')
-            return response.get('_embedded', {}).get('folders', [])
+            endpoint = '/kb/public/categories' if public else '/kb/categories'
+            response = self._make_request('GET', endpoint)
+            if response.get('success'):
+                return response.get('data', [])
+            return []
         except Exception as e:
-            # Knowledge base may not be available via standard API
-            print(f"Note: Knowledge base folders endpoint may not be available: {e}")
+            print(f"Note: Knowledge base categories endpoint may not be available: {e}")
             return []
     
-    def get_kb_folder(self, folder_id: int) -> Dict:
-        """Get a specific knowledge base folder"""
-        return self._make_request('GET', f'/folders/{folder_id}')
+    def get_kb_category(self, category_id: int, public: bool = True) -> Dict:
+        """
+        Get a specific knowledge base category with its articles
+        
+        Args:
+            category_id: Category ID
+            public: Use public endpoint (no auth) if True
+        
+        Returns:
+            Dictionary with category and articles
+        """
+        endpoint = f'/kb/public/categories/{category_id}' if public else f'/kb/categories/{category_id}'
+        response = self._make_request('GET', endpoint)
+        if response.get('success'):
+            return response.get('data', {})
+        return {}
     
-    def list_kb_articles(self, folder_id: Optional[int] = None) -> List[Dict]:
+    def list_kb_articles(self, category_id: Optional[int] = None, 
+                        page: int = 1, per_page: int = 20,
+                        public: bool = True) -> Dict:
         """
         List knowledge base articles
         
         Args:
-            folder_id: Optional folder ID to filter articles
+            category_id: Optional category ID to filter articles
+            page: Page number for pagination
+            per_page: Items per page
+            public: Use public endpoint (no auth) if True
+        
+        Returns:
+            Dictionary with articles array and pagination info
         """
         try:
-            endpoint = '/articles'
-            if folder_id:
-                endpoint += f'?folderId={folder_id}'
+            endpoint = '/kb/public/articles' if public else '/kb/articles'
+            params = []
+            if category_id:
+                params.append(f'category_id={category_id}')
+            params.append(f'page={page}')
+            params.append(f'per_page={per_page}')
+            
+            if params:
+                endpoint += '?' + '&'.join(params)
             
             response = self._make_request('GET', endpoint)
-            return response.get('_embedded', {}).get('articles', [])
+            if response.get('success'):
+                return response
+            return {'data': [], 'pagination': {}}
         except Exception as e:
-            # Knowledge base may require a module or have different endpoints
             print(f"Note: Knowledge base articles endpoint may not be available: {e}")
-            return []
+            return {'data': [], 'pagination': {}}
     
-    def get_kb_article(self, article_id: int) -> Dict:
-        """Get a specific knowledge base article"""
-        return self._make_request('GET', f'/articles/{article_id}')
+    def get_kb_article(self, article_id: int, public: bool = True) -> Dict:
+        """
+        Get a specific knowledge base article
+        
+        Args:
+            article_id: Article ID
+            public: Use public endpoint (no auth) if True
+        
+        Returns:
+            Dictionary with article and category information
+        """
+        endpoint = f'/kb/public/articles/{article_id}' if public else f'/kb/articles/{article_id}'
+        response = self._make_request('GET', endpoint)
+        if response.get('success'):
+            return response.get('data', {})
+        return {}
     
-    def search_kb_articles(self, query: str) -> List[Dict]:
-        """Search knowledge base articles"""
+    def search_kb_articles(self, query: str, public: bool = True) -> List[Dict]:
+        """
+        Search knowledge base articles
+        
+        Args:
+            query: Search query string
+            public: Use public endpoint (no auth) if True
+        
+        Returns:
+            List of matching articles
+        """
         try:
-            response = self._make_request('GET', f'/articles?search={query}')
-            return response.get('_embedded', {}).get('articles', [])
+            endpoint = f'/kb/public/search' if public else f'/kb/search'
+            endpoint += f'?q={query}'
+            response = self._make_request('GET', endpoint)
+            if response.get('success'):
+                return response.get('data', [])
+            return []
         except Exception as e:
             print(f"Note: Knowledge base search may not be available: {e}")
             return []
+    
+    # Legacy KB methods (for backward compatibility)
+    def list_kb_folders(self) -> List[Dict]:
+        """List all knowledge base folders/categories (legacy method)"""
+        return self.list_kb_categories(public=True)
+    
+    def get_kb_folder(self, folder_id: int) -> Dict:
+        """Get a specific knowledge base folder (legacy method)"""
+        return self.get_kb_category(folder_id, public=True)
 
 
 # Example usage
@@ -380,27 +453,57 @@ if __name__ == '__main__':
                 print()
         
         print("\n" + "="*60)
-        print("FREESCOUT KNOWLEDGE BASE")
+        print("FREESCOUT KNOWLEDGE BASE API (New Module)")
         print("="*60 + "\n")
         
-        # Try to access knowledge base
-        print("Fetching knowledge base folders...")
-        folders = client.list_kb_folders()
-        if folders:
-            print(f"Found {len(folders)} knowledge base folders:")
-            for folder in folders:
-                print(f"  - {folder.get('name')} (ID: {folder.get('id')})")
+        # Try to access knowledge base using new API module
+        print("Fetching knowledge base categories (public API)...")
+        categories = client.list_kb_categories(public=True)
+        if categories:
+            print(f"Found {len(categories)} knowledge base categories:")
+            for category in categories[:5]:  # Show first 5
+                print(f"  - {category.get('name')} (ID: {category.get('id')})")
+                if category.get('children'):
+                    for child in category.get('children', []):
+                        print(f"    └─ {child.get('name')} (ID: {child.get('id')})")
         else:
-            print("No folders found or knowledge base may require a module.")
+            print("No categories found. Make sure the KnowledgeBaseAPI module is installed and activated.")
         
-        print("\nFetching knowledge base articles...")
-        articles = client.list_kb_articles()
+        print("\nFetching knowledge base articles (public API)...")
+        articles_response = client.list_kb_articles(public=True, per_page=5)
+        articles = articles_response.get('data', [])
         if articles:
-            print(f"Found {len(articles)} articles:")
-            for article in articles[:5]:  # Show first 5
-                print(f"  - {article.get('title', 'Untitled')} (ID: {article.get('id')})")
+            print(f"Found articles (showing first 5):")
+            for article in articles:
+                print(f"  - {article.get('title', 'Untitled')} (ID: {article.get('id')}, Views: {article.get('views', 0)})")
+                if article.get('category'):
+                    print(f"    Category: {article['category'].get('name')}")
         else:
-            print("No articles found. Knowledge base may require a specific module or different endpoints.")
+            print("No articles found. Make sure the KnowledgeBaseAPI module is installed.")
+        
+        # Test search
+        if articles:
+            print("\nTesting search functionality...")
+            search_results = client.search_kb_articles("help", public=True)
+            if search_results:
+                print(f"Found {len(search_results)} results for 'help':")
+                for result in search_results[:3]:  # Show first 3
+                    print(f"  - {result.get('title')}")
+            else:
+                print("No search results found.")
+        
+        # Get detailed article if available
+        if articles and len(articles) > 0:
+            first_article_id = articles[0].get('id')
+            print(f"\nFetching full details for article ID {first_article_id}...")
+            article_data = client.get_kb_article(first_article_id, public=True)
+            if article_data and article_data.get('article'):
+                article = article_data['article']
+                print(f"Title: {article.get('title')}")
+                print(f"Excerpt: {article.get('excerpt', 'No excerpt')[:100]}...")
+                print(f"Views: {article.get('views', 0)}")
+                if article_data.get('category'):
+                    print(f"Category: {article_data['category'].get('name')}")
 
     except Exception as e:
         print(f"Error: {e}")

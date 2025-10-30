@@ -1,0 +1,20 @@
+{
+    "name": "KnowledgeBaseAPI",
+    "alias": "knowledgebaseapi",
+    "description": "Exposes FreeScout Knowledge Base through REST API endpoints",
+    "keywords": [
+        "freescout",
+        "knowledge base",
+        "api",
+        "rest"
+    ],
+    "version": "1.0.0",
+    "active": 1,
+    "order": 1,
+    "providers": [
+        "Modules\\KnowledgeBaseAPI\\Providers\\KnowledgeBaseAPIServiceProvider"
+    ],
+    "aliases": {},
+    "files": [],
+    "requires": []
+}
