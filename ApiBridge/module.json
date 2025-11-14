@@ -1,0 +1,26 @@
+{
+    "name": "API Bridge",
+    "alias": "apibridge",
+    "description": "Custom FreeScout API & webhook integration",
+    "version": "0.1.0",
+    "author": "Gabriel",
+    "authorUrl": "https://freescout.example.com",
+    "requiredAppVersion": "1.8.154",
+    "license": "AGPL-3.0",
+    "keywords": [],
+    "active": 0,
+    "order": 0,
+    "providers": [
+        "Modules\\ApiBridge\\Providers\\ApiBridgeServiceProvider"
+    ],
+    "aliases": {
+        "ApiBridge": "Modules\\ApiBridge\\Support\\ApiBridge"
+    },
+    "files": [
+        "start.php"
+    ],
+    "requires": []
+}
+
+
+
