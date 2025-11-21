@@ -41,13 +41,4 @@ yarn-error.log*
 **/*.sqlite
 **/*.sqlite3
 
-# Uploads directory - ignore all uploaded files but keep structure
-backend/uploads/*
-!backend/uploads/.gitignore
-!backend/uploads/academic_training/offer_letters/.gitkeep
-!backend/uploads/academic_training/training_authorizations/.gitkeep
-!backend/uploads/florida_statute_101035/.gitkeep
-!backend/uploads/opt_requests/.gitkeep
-!backend/uploads/leave_requests/.gitkeep
-!backend/uploads/opt_stem_applications/.gitkeep
-!backend/uploads/exit_forms/.gitkeep
+backend/
